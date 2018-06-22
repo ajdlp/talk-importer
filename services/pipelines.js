@@ -1,7 +1,7 @@
 const h = require('highland');
 const {
   services: { Assets, Comments, Users },
-  models: { Comment },
+  models: { Comment, User, Asset },
 } = require('./talk/graph/connectors');
 const { get } = require('lodash');
 const { PassThrough } = require('stream');
@@ -96,6 +96,7 @@ module.exports.save = {
   comments: comment => {
     return h(Comment.findOne({ id: comment.id })).flatMap(foundComment => {
       if (foundComment) {
+        delete comment.source
         Object.assign(foundComment, comment);
         return h(
           foundComment.save().catch(err => {
@@ -126,8 +127,7 @@ module.exports.save = {
     return h(
       Users.findOrCreateExternalUser({
         id: profile.id,
-        displayName: user.username,
-        provider: profile.provider,
+        displayName: user.username
       }).catch(err => {
         err.id = user.id;
         throw err;
