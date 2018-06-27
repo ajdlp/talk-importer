@@ -123,20 +123,19 @@ module.exports.save = {
    */
   users: user => {
     const profile = get(user, 'profiles[0]', null);
-
     return h(
       Users.findOrCreateExternalUser({
         id: profile.id,
         displayName: user.username
       }).catch(err => {
-        err.id = user.id;
+        err.id = profile.id;
         throw err;
       })
     ).flatMap(a => {
       a = Object.assign(a, user);
       return h(
         a.save().catch(err => {
-          err.id = user.id;
+          err.id = profile.id;
           throw err;
         })
       );
